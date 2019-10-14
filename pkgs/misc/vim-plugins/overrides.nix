@@ -653,6 +653,36 @@ self: super: {
     '';
   });
 
+  vim-markdown-composer = let
+    rev = "761cbefa59633657cabadafe94011e6fcd650bb3";
+    version = "git-${rev}";
+    vim-markdown-composer-src = fetchFromGitHub {
+      owner = "euclio";
+      repo = "vim-markdown-composer";
+      inherit rev;
+      sha256 = "0wqy22awql25rkfl22wypqwcxcjj7ia1i7j2f0ssvjmaja3cyfa1";
+      fetchSubmodules = true;
+    };
+    vim-markdown-composer-bin = rustPlatform.buildRustPackage rec {
+      name = "vim-markdown-composer-bin";
+      src = vim-markdown-composer-src;
+
+      cargoSha256 = "1iwj621nwxjp0drc2ilsbwwd1qzlcg6qw9i20dj0rfwzihs95l0w";
+    };
+  in buildVimPluginFrom2Nix {
+    pname = "vim-markdown-composer";
+    inherit version;
+    src = vim-markdown-composer-src;
+
+    propagatedBuildInputs = [ vim-markdown-composer-bin ];
+
+    preFixup = ''
+      substituteInPlace "$out"/share/vim-plugins/vim-markdown-composer-git/after/ftplugin/markdown/composer.vim \
+        --replace "let l:args = [s:plugin_root . '/target/release/markdown-composer']" \
+        "let l:args = ['${vim-markdown-composer-bin}/bin/markdown-composer']"
+    '';
+  };
+
   vim-metamath = super.vim-metamath.overrideAttrs(old: {
     preInstall = "cd vim";
   });

@@ -5617,6 +5617,18 @@ let
     meta.homepage = "https://github.com/plasticboy/vim-markdown/";
   };
 
+  vim-markdown-composer = buildVimPluginFrom2Nix {
+    pname = "vim-markdown-composer";
+    version = "2019-09-12";
+    src = fetchFromGitHub {
+      owner = "euclio";
+      repo = "vim-markdown-composer";
+      rev = "8a7d8ee9d46d11e8d6300e6d83ef14267a108951";
+      sha256 = "14xpqfczrlvf2c4ylm6i2vm5wqx9ab6p27fflgrczrpg2cxra83p";
+      fetchSubmodules = true;
+    };
+  };
+
   vim-mergetool = buildVimPluginFrom2Nix {
     pname = "vim-mergetool";
     version = "2019-06-22";
