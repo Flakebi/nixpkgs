@@ -438,11 +438,12 @@ let
                 "auth optional ${pkgs.pam_gnupg}/lib/security/pam_gnupg.so"
                 + optionalString cfg.gnupg.storeOnly " store-only"
                }
-              ${optionalString cfg.googleAuthenticator.enable
-                "auth required ${pkgs.googleAuthenticator}/lib/security/pam_google_authenticator.so no_increment_hotp"}
               ${optionalString cfg.duoSecurity.enable
                 "auth required ${pkgs.duo-unix}/lib/security/pam_duo.so"}
             '') + ''
+          ${optionalString cfg.googleAuthenticator.enable
+            "auth required ${pkgs.googleAuthenticator}/lib/security/pam_google_authenticator.so nullok no_increment_hotp
+             auth sufficient pam_permit.so"}
           ${optionalString cfg.unixAuth
               "auth sufficient pam_unix.so ${optionalString cfg.allowNullPassword "nullok"} ${optionalString cfg.nodelay "nodelay"} likeauth try_first_pass"}
           ${optionalString cfg.otpwAuth
