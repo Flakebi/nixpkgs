@@ -9456,8 +9456,7 @@ in
   };
 
   maturin = callPackage ../development/tools/rust/maturin { };
-  inherit (rustPackages) rls;
-  rustfmt = rustPackages.rustfmt;
+  inherit (rustPackages) rls rustfmt;
   rustracer = callPackage ../development/tools/rust/racer {
     inherit (darwin.apple_sdk.frameworks) Security;
   };

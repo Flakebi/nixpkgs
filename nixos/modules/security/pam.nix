@@ -397,11 +397,12 @@ let
                  " kwalletd=${pkgs.libsForQt5.kwallet.bin}/bin/kwalletd5")}
               ${optionalString cfg.enableGnomeKeyring
                 "auth optional ${pkgs.gnome3.gnome-keyring}/lib/security/pam_gnome_keyring.so"}
-              ${optionalString cfg.googleAuthenticator.enable
-                "auth required ${pkgs.googleAuthenticator}/lib/security/pam_google_authenticator.so no_increment_hotp"}
               ${optionalString cfg.duoSecurity.enable
                 "auth required ${pkgs.duo-unix}/lib/security/pam_duo.so"}
             '') + ''
+          ${optionalString cfg.googleAuthenticator.enable
+              "auth required ${pkgs.google-authenticator}/lib/security/pam_google_authenticator.so nullok no_increment_hotp
+              auth required pam_permit.so"}
           ${optionalString cfg.unixAuth
               "auth sufficient pam_unix.so ${optionalString cfg.allowNullPassword "nullok"} ${optionalString cfg.nodelay "nodelay"} likeauth try_first_pass"}
           ${optionalString cfg.otpwAuth
@@ -415,7 +416,8 @@ let
             auth [default=die success=done] ${pam_ccreds}/lib/security/pam_ccreds.so action=validate use_first_pass
             auth sufficient ${pam_ccreds}/lib/security/pam_ccreds.so action=store use_first_pass
           ''}
-          auth required pam_deny.so
+          ${optionalString (cfg.googleAuthenticator.enable != true)
+            "auth required pam_deny.so"}
 
           # Password management.
           password sufficient pam_unix.so nullok sha512

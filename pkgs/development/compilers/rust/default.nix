@@ -85,6 +85,7 @@
         pkgsBuildHost = pkgsBuildBuild // { targetPackages.stdenv = llvmPackages_5.stdenv; };
         pkgsBuildTarget = pkgsBuildTarget // { targetPackages.stdenv = llvmPackages_5.stdenv; };
       });
+      rust-analyzer = self.callPackage ./rust-analyzer.nix { };
       rustfmt = self.callPackage ./rustfmt.nix { inherit Security; };
       cargo = self.callPackage ./cargo.nix {
         # Use boot package set to break cycle
