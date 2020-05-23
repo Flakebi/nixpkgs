@@ -78,7 +78,7 @@ in
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         ExecStart = concatStringsSep " " ([
-          "${cfg.package}/bin/radicale" "-C" confFile
+          "${cfg.package}/bin/radicale"
         ] ++ (
           map escapeShellArg cfg.extraArgs
         ));

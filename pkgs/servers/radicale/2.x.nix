@@ -1,4 +1,4 @@
-{ stdenv, fetchFromGitHub, python3 }:
+{ stdenv, fetchFromGitHub, python3, extraInputs ? [] }:
 
 python3.pkgs.buildPythonApplication rec {
   pname = "Radicale";
@@ -23,7 +23,7 @@ python3.pkgs.buildPythonApplication rec {
     python-dateutil
     passlib
     setuptools
-  ];
+  ] ++ extraInputs;
 
   checkInputs = with python3.pkgs; [
     pytestrunner
