@@ -6,7 +6,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://cdist2.perforce.com/perforce/r19.2/bin.linux26x86_64/helix-core-server.tgz";
-    sha256 = "10bn2h5ncyk7pck5ris2ri8rhx0jjzn67xm8sn8c2a3dz3wbap0n";
+    sha256 = "0ksk05vajkgbm4c4siprdjw4bpvg7dwy1niwdf7w2wkwx6r9zgz3";
   };
 
   # Work around the "unpacker appears to have produced no directories"
