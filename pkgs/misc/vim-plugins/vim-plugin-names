@@ -101,6 +101,7 @@ ensime/ensime-vim
 ervandew/supertab
 esneider/YUNOcommit.vim
 euclio/vim-markdown-composer
+evanleck/vim-svelte
 fannheyward/coc-rust-analyzer
 farmergreg/vim-lastplace
 fatih/vim-go
