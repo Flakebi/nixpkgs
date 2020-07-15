@@ -55,6 +55,7 @@ ckarnell/antonys-macro-repeater
 ckipp01/coc-metals
 cloudhead/neovim-fuzzy
 CoatiSoftware/vim-sourcetrail
+coc-extensions/coc-svelte
 cocopon/iceberg.vim
 cohama/lexima.vim
 crusoexia/vim-monokai

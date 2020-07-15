@@ -675,6 +675,18 @@ let
     meta.homepage = "https://github.com/neoclide/coc-stylelint/";
   };
 
+  coc-svelte = buildVimPluginFrom2Nix {
+    pname = "coc-svelte";
+    version = "2020-07-05";
+    src = fetchFromGitHub {
+      owner = "coc-extensions";
+      repo = "coc-svelte";
+      rev = "66dadd0c6e249eff3fbf4610cdef2d413c01d542";
+      sha256 = "1m3151k0smdwy3k6xfg07a4wlkzmxp2i1blmvjfmjsz9j192l0sp";
+    };
+    meta.homepage = "https://github.com/coc-extensions/coc-svelte/";
+  };
+
   coc-tabnine = buildVimPluginFrom2Nix {
     pname = "coc-tabnine";
     version = "2020-01-06";
