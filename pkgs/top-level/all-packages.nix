@@ -8129,6 +8129,8 @@ in
 
   fish = callPackage ../shells/fish { };
 
+  fish-async-prompt = callPackage ../shells/fish/fish-async-prompt { };
+
   fish-foreign-env = callPackage ../shells/fish/fish-foreign-env { };
 
   ion = callPackage ../shells/ion { };
