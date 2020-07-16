@@ -263,6 +263,12 @@ self: super: {
     src = "${nodePackages.coc-stylelint}/lib/node_modules/coc-stylelint";
   };
 
+  coc-svelte = buildVimPluginFrom2Nix {
+    pname = "coc-svelte";
+    version = nodePackages.coc-svelte.version;
+    src = "${nodePackages.coc-svelte}/lib/node_modules/coc-svelte";
+  };
+
   coc-tabnine = buildVimPluginFrom2Nix {
     pname = "coc-tabnine";
     version = nodePackages.coc-tabnine.version;

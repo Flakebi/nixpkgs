@@ -41,6 +41,7 @@
 , "coc-snippets"
 , "coc-solargraph"
 , "coc-stylelint"
+, "coc-svelte"
 , "coc-tabnine"
 , "coc-tslint"
 , "coc-tslint-plugin"
@@ -166,6 +167,7 @@
 , "ssb-server"
 , "stackdriver-statsd-backend"
 , "stf"
+, "svelte-language-server"
 , "svgo"
 , "swagger"
 , {"tedicross": "git+https://github.com/TediCross/TediCross.git#v0.8.7"}
