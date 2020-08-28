@@ -137,7 +137,7 @@ Platform Vendor      Advanced Micro Devices, Inc.</screen>
       <literal>:</literal>. For example:
 
       <screen><prompt>$</prompt> export \
-  VK_ICD_FILENAMES=`nix-build '&lt;nixpkgs&gt;' --no-out-link -A amdvlk`/share/vulkan/icd.d/amd_icd64.json</screen>
+  VK_ICD_FILENAMES=`nix-build '&lt;nixpkgs&gt;' --no-out-link -A amdvlk`/share/vulkan/icd.d/amd_icd64.json:`nix-build '&lt;nixpkgs&gt;' --no-out-link -A driversi686Linux.amdvlk`/share/vulkan/icd.d/amd_icd32.json</screen>
     </para>
 
     <para>
@@ -184,6 +184,8 @@ GPU1:
 
 	<programlisting><xref linkend="opt-hardware.opengl.extraPackages"/> = [
   <package>amdvlk</package>
+  # For the 32-bit driver
+  <package>driversi686Linux.amdvlk</package>
 ];
 
 # For amdvlk
