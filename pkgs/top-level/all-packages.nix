@@ -12220,6 +12220,8 @@ in
   };
   swiPrologWithGui = swiProlog.override { withGui = true; };
 
+  tauri-bundler = callPackage ../development/tools/rust/tauri-bundler { };
+
   tbb = callPackage ../development/libraries/tbb { };
 
   terra = callPackage ../development/compilers/terra {
