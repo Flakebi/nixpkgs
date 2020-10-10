@@ -79,6 +79,8 @@
                 }
               ];
           });
+
+        make-system-tarball = import ./nixos/lib/make-system-tarball.nix;
       });
 
       checks.x86_64-linux.tarball = jobs.tarball;
@@ -93,6 +95,7 @@
       legacyPackages = forAllSystems (system: import ./. { inherit system; });
 
       nixosModules = {
+        hardened = import ./nixos/modules/profiles/hardened.nix;
         notDetected = import ./nixos/modules/installer/scan/not-detected.nix;
       };
     };
