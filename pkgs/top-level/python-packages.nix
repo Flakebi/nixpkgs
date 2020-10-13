@@ -171,6 +171,8 @@ in {
 
   accuweather = callPackage ../development/python-modules/accuweather { };
 
+  academic = callPackage ../development/python-modules/academic { };
+
   accupy = callPackage ../development/python-modules/accupy { };
 
   acebinf = callPackage ../development/python-modules/acebinf { };
