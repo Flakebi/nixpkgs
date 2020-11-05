@@ -95,6 +95,8 @@
       legacyPackages = forAllSystems (system: import ./. { inherit system; });
 
       nixosModules = {
+        # TODO Temporary, replace with upstream keycloak
+        keycloak = import ./nixos/modules/services/web-apps/keycloak;
         hardened = import ./nixos/modules/profiles/hardened.nix;
         notDetected = import ./nixos/modules/installer/scan/not-detected.nix;
       };

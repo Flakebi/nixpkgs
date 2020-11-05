@@ -19621,7 +19621,9 @@ in
 
   kapowbang = callPackage ../servers/kapowbang { };
 
-  keycloak = callPackage ../servers/keycloak { };
+  keycloak = callPackage ../servers/keycloak {
+    jre = jdk11;
+  };
 
   knot-dns = callPackage ../servers/dns/knot-dns { };
   knot-resolver = callPackage ../servers/dns/knot-resolver { };
