@@ -1,0 +1,48 @@
+diff --git a/extern/CMakeLists.txt b/extern/CMakeLists.txt
+index 3413f4c..82e3007 100644
+--- a/extern/CMakeLists.txt
++++ b/extern/CMakeLists.txt
+@@ -35,20 +35,6 @@ endif()
+ # SDL 2
+ #
+ 
+-option(SDL_SHARED"" OFF)
+-option(SDL_STATIC"" ON)
+-option(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+-
+-if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
+-	option(INPUT_TSLIB OFF)
+-endif()
+-
+-add_subdirectory(SDL2)
+-
+-set_target_properties(SDL2main PROPERTIES FOLDER extern)
+-set_target_properties(SDL2-static PROPERTIES FOLDER extern)
+-set_target_properties(uninstall PROPERTIES FOLDER extern)
+-
+ #
+ # CURL
+ #
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 2ee42ef..efc078f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -501,8 +501,16 @@ if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
+     TARGET_LINK_LIBRARIES(client SDL2main SDL2-static z)
+     TARGET_LINK_LIBRARIES(server SDL2main SDL2-static z)
+ else()
+-    TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
+-    TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
++	find_package(SDL2 REQUIRED)
++	include_directories(${SDL2_INCLUDE_DIRS})
++	find_package(ZLIB REQUIRED)
++	include_directories(${ZLIB_INCLUDE_DIRS})
++	# target_include_directories(client ${SDL2_INCLUDE_DIRS})
++	target_link_libraries(client ${SDL2_LIBRARIES})
++	# target_include_directories(server ${SDL2_INCLUDE_DIRS})
++	target_link_libraries(server ${SDL2_LIBRARIES})
++    TARGET_LINK_LIBRARIES(client ${ZLIB_LIBRARIES})
++    TARGET_LINK_LIBRARIES(server ${ZLIB_LIBRARIES})
+ endif()
+ 
+ SET_TARGET_PROPERTIES(client

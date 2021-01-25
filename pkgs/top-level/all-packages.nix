@@ -29270,6 +29270,8 @@ in
 
   pysolfc = python3Packages.callPackage ../games/pysolfc { };
 
+  q2rtx = callPackage ../games/q2rtx { };
+
   qqwing = callPackage ../games/qqwing { };
 
   quake3wrapper = callPackage ../games/quake3/wrapper { };

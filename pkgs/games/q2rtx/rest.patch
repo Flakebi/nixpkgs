@@ -1,0 +1,151 @@
+diff --git a/extern/CMakeLists.txt b/extern/CMakeLists.txt
+index 82e3007..e050577 100644
+--- a/extern/CMakeLists.txt
++++ b/extern/CMakeLists.txt
+@@ -1,18 +1,12 @@
++add_library(stb INTERFACE)
++target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
++add_library(tinyobjloader INTERFACE)
++target_include_directories(tinyobjloader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader-c)
+ 
+ #
+ # ZLIB
+ #
+ 
+-if (NOT CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
+-    add_subdirectory(zlib)
+-    target_include_directories(zlibstatic PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/zlib>)
+-
+-    set_target_properties(zlib PROPERTIES FOLDER extern)
+-    set_target_properties(zlibstatic PROPERTIES FOLDER extern)
+-    set_target_properties(minigzip PROPERTIES FOLDER extern)
+-    set_target_properties(example PROPERTIES FOLDER extern)
+-endif()
+-
+ #
+ # glslangValidator
+ #
+@@ -38,32 +32,3 @@ endif()
+ #
+ # CURL
+ #
+-
+-if(CONFIG_USE_CURL)
+-
+-    option(BUILD_CURL_EXE "" OFF)
+-    option(BUILD_SHARED_LIBS "" OFF)
+-    option(CURL_STATICLIB "" ON)
+-    option(BUILD_TESTING "" OFF)
+-    option(ENABLE_MANUAL "" OFF)
+-    option(ENABLE_DOCS "" OFF)
+-    option(HTTP_ONLY "" ON)
+-    option(CURL_ZLIB "" OFF)
+-    option(CMAKE_USE_OPENSSL "" OFF)
+-    set(CURL_CA_PATH "none" CACHE PATH "")
+-
+-    set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Override CMAKE_DEBUG_POSTFIX, which curl sets to '-d'")
+-    
+-    set(ZLIB_DIR "{CMAKE_CURRENT_SOURCE_DIR}/zlib")
+-
+-    add_subdirectory(curl)
+-
+-    set_target_properties(libcurl PROPERTIES FOLDER extern)
+-endif()
+-
+-
+-add_library(stb INTERFACE)
+-target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
+-
+-add_library(tinyobjloader INTERFACE)
+-target_include_directories(tinyobjloader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader-c)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index efc078f..22f0b1c 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -374,7 +374,7 @@ ADD_DEFINITIONS(-DVERSION_POINT=${Q2RTX_VERSION_POINT})
+ ADD_DEFINITIONS(-DVERSION_SHA=${Q2RTX_VERSION_SHA})
+ ADD_DEFINITIONS(-DVERSION_BRANCH=${Q2RTX_VERSION_BRANCH})
+ 
+-ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB)
++ADD_DEFINITIONS(-DHAVE_CONFIG_H=1)
+ 
+ IF(WIN32)
+ 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
+@@ -382,18 +382,18 @@ ENDIF()
+ 
+ ADD_LIBRARY(baseq2 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
+ IF(WIN32)
+-ADD_EXECUTABLE(client WIN32 
+-	${SRC_CLIENT} ${HEADERS_CLIENT} 
+-	${SRC_COMMON} ${HEADERS_COMMON} 
+-	${SRC_REFRESH} ${SRC_SHADERS} 
+-	${SRC_SHARED} 
++ADD_EXECUTABLE(client WIN32
++	${SRC_CLIENT} ${HEADERS_CLIENT}
++	${SRC_COMMON} ${HEADERS_COMMON}
++	${SRC_REFRESH} ${SRC_SHADERS}
++	${SRC_SHARED}
+ 	${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
+ 	${SRC_SERVER} ${HEADERS_SERVER}
+ 	windows/res/q2rtx.rc
+ )
+-ADD_EXECUTABLE(server 
+-	${SRC_COMMON} ${HEADERS_COMMON} 
+-	${SRC_SHARED} 
++ADD_EXECUTABLE(server
++	${SRC_COMMON} ${HEADERS_COMMON}
++	${SRC_SHARED}
+ 	${SRC_WINDOWS} ${HEADERS_WINDOWS}
+ 	${SRC_SERVER} ${HEADERS_SERVER}
+ 	server/ac.c
+@@ -402,16 +402,16 @@ ADD_EXECUTABLE(server
+ )
+ ELSE()
+ ADD_EXECUTABLE(client
+-	${SRC_CLIENT} ${HEADERS_CLIENT} 
+-	${SRC_COMMON} ${HEADERS_COMMON} 
+-	${SRC_REFRESH} ${SRC_SHADERS} 
+-	${SRC_SHARED} 
++	${SRC_CLIENT} ${HEADERS_CLIENT}
++	${SRC_COMMON} ${HEADERS_COMMON}
++	${SRC_REFRESH} ${SRC_SHADERS}
++	${SRC_SHARED}
+ 	${SRC_LINUX} ${SRC_LINUX_CLIENT}
+ 	${SRC_SERVER} ${HEADERS_SERVER}
+ )
+ ADD_EXECUTABLE(server
+-	${SRC_COMMON} ${HEADERS_COMMON} 
+-	${SRC_SHARED} 
++	${SRC_COMMON} ${HEADERS_COMMON}
++	${SRC_SHARED}
+ 	${SRC_LINUX}
+ 	${SRC_SERVER} ${HEADERS_SERVER}
+ 	server/ac.c
+@@ -425,7 +425,10 @@ TARGET_COMPILE_DEFINITIONS(server PRIVATE USE_SERVER=1 USE_CLIENT=0)
+ IF(CONFIG_USE_CURL)
+ 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_HTTP})
+ 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_CURL=1)
+-	TARGET_LINK_LIBRARIES(client libcurl)
++	# TARGET_LINK_LIBRARIES(client libcurl)
++	find_package(curl REQUIRED)
++	include_directories(${CURL_INCLUDE_DIRS})
++	target_link_libraries(client ${CURL_LIBRARIES})
+ ENDIF()
+ 
+ add_dependencies(client shaders)
+@@ -453,8 +456,13 @@ IF (CONFIG_VKPT_RENDERER)
+ 	ENDIF()
+ ENDIF()
+ 
+-TARGET_LINK_LIBRARIES(client stb)
+-TARGET_LINK_LIBRARIES(client tinyobjloader)
++# find_package(tinyobjloader REQUIRED)
++# include_directories(${TINYOBJLOADER_INCLUDE_DIRS})
++target_link_libraries(client tinyobjloader)
++# find_library(STB stb_image.h REQUIRED)
++# include_directories(${STB_INCLUDE_DIR})
++TARGET_LINK_LIBRARIES(client stb m ${CMAKE_DL_LIBS})
++TARGET_LINK_LIBRARIES(server m ${CMAKE_DL_LIBS})
+ 
+ SOURCE_GROUP("baseq2\\sources" FILES ${SRC_BASEQ2})
+ SOURCE_GROUP("baseq2\\headers" FILES ${HEADERS_BASEQ2})
