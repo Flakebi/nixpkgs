@@ -6,7 +6,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://cdist2.perforce.com/perforce/r20.1/bin.linux26x86_64/helix-core-server.tgz";
-    sha256 = "0ly9b838zrpp6841fzapizdd3xmria55bwfrh2j29qwxiwzqj80y";
+    sha256 = "9T6BtMhMxSoTr0bwcFCZokvTYR/x/sYXmZ1v55z5Mfg=";
   };
 
   sourceRoot = ".";
