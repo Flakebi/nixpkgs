@@ -863,6 +863,7 @@
   ./services/misc/llama-cpp.nix
   ./services/misc/logkeys.nix
   ./services/misc/mame.nix
+  ./services/misc/matrix-appservices/default.nix
   ./services/misc/mbpfan.nix
   ./services/misc/mediatomb.nix
   ./services/misc/metabase.nix
