@@ -317,6 +317,7 @@
   ./services/databases/foundationdb.nix
   ./services/databases/hbase.nix
   ./services/databases/influxdb.nix
+  ./services/databases/kanidm.nix
   ./services/databases/memcached.nix
   ./services/databases/monetdb.nix
   ./services/databases/mongodb.nix

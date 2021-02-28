@@ -81,6 +81,16 @@ let
         };
       };
 
+      kanidm = {
+        enable = mkOption {
+          default = false;
+          type = types.bool;
+          description = ''
+            If set, allow users managed by kanidm to login.
+          '';
+        };
+      };
+
       usbAuth = mkOption {
         default = config.security.pam.usb.enable;
         type = types.bool;
@@ -372,7 +382,7 @@ let
       text = mkDefault
         (''
           # Account management.
-          account required pam_unix.so
+          account required pam_unix.so${optionalString cfg.kanidm.enable " broken_shadow"}
           ${optionalString use_ldap
               "account sufficient ${pam_ldap}/lib/security/pam_ldap.so"}
           ${optionalString (config.services.sssd.enable && cfg.sssdStrictAccess==false)
@@ -385,6 +395,8 @@ let
             account [success=ok ignore=ignore default=die] ${pkgs.google-compute-engine-oslogin}/lib/pam_oslogin_login.so
             account [success=ok default=ignore] ${pkgs.google-compute-engine-oslogin}/lib/pam_oslogin_admin.so
           ''}
+          ${optionalString cfg.kanidm.enable
+              "account sufficient ${pkgs.kanidm}/lib/libpam_kanidm.so"}
 
           # Authentication management.
           ${optionalString cfg.googleOsLoginAuthentication
@@ -421,6 +433,7 @@ let
             || cfg.pamMount
             || cfg.enableKwallet
             || cfg.enableGnomeKeyring
+            || cfg.kanidm.enable
             || cfg.googleAuthenticator.enable
             || cfg.gnupg.enable
             || cfg.duoSecurity.enable)) ''
@@ -444,6 +457,8 @@ let
           ${optionalString cfg.googleAuthenticator.enable
             "auth required ${pkgs.googleAuthenticator}/lib/security/pam_google_authenticator.so nullok no_increment_hotp
              auth sufficient pam_permit.so"}
+          ${optionalString cfg.kanidm.enable
+              "auth sufficient ${pkgs.kanidm}/lib/libpam_kanidm.so ignore_unknown_user"}
           ${optionalString cfg.unixAuth
               "auth sufficient pam_unix.so ${optionalString cfg.allowNullPassword "nullok"} ${optionalString cfg.nodelay "nodelay"} likeauth try_first_pass"}
           ${optionalString cfg.otpwAuth
@@ -471,6 +486,8 @@ let
               "password sufficient ${pkgs.sssd}/lib/security/pam_sss.so use_authtok"}
           ${optionalString config.krb5.enable
               "password sufficient ${pam_krb5}/lib/security/pam_krb5.so use_first_pass"}
+          ${optionalString cfg.kanidm.enable
+              "password optional ${pkgs.kanidm}/lib/libpam_kanidm.so"}
           ${optionalString cfg.enableGnomeKeyring
               "password optional ${pkgs.gnome.gnome-keyring}/lib/security/pam_gnome_keyring.so use_authtok"}
 
@@ -497,6 +514,8 @@ let
               "session optional ${pkgs.sssd}/lib/security/pam_sss.so"}
           ${optionalString config.krb5.enable
               "session optional ${pam_krb5}/lib/security/pam_krb5.so"}
+          ${optionalString cfg.kanidm.enable
+              "session optional ${pkgs.kanidm}/lib/libpam_kanidm.so"}
           ${optionalString cfg.otpwAuth
               "session optional ${pkgs.otpw}/lib/security/pam_otpw.so"}
           ${optionalString cfg.startSession
