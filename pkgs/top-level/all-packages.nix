@@ -8764,6 +8764,7 @@ with pkgs;
   };
 
   haproxy = callPackage ../tools/networking/haproxy { };
+  haproxy-spoe-auth = callPackage ../tools/networking/haproxy-spoe-auth { };
 
   hackertyper = callPackage ../tools/misc/hackertyper { };
 
