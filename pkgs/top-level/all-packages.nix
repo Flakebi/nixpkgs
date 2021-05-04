@@ -23840,6 +23840,9 @@ in
 
   evilpixie = libsForQt5.callPackage ../applications/graphics/evilpixie { };
 
+  eww = callPackage ../applications/misc/eww { };
+  eww-wayland = callPackage ../applications/misc/eww { useWayland = true; };
+
   exercism = callPackage ../applications/misc/exercism { };
 
   expenses = callPackage ../applications/misc/expenses { };
