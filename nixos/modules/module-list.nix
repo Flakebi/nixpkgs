@@ -885,6 +885,7 @@
   ./services/monitoring/prometheus/exporters.nix
   ./services/monitoring/prometheus/pushgateway.nix
   ./services/monitoring/prometheus/sachet.nix
+  ./services/monitoring/prometheus/telegram-bot.nix
   ./services/monitoring/prometheus/xmpp-alerts.nix
   ./services/monitoring/riemann-dash.nix
   ./services/monitoring/riemann-tools.nix
