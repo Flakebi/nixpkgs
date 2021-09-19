@@ -64,8 +64,8 @@ let
         ProtectKernelModules = true;
         ProtectControlGroups = true;
 
-        User = "matrix-appservice";
-        Group = cfg.homeserver;
+        User = "matrix-as-${name}";
+        Group = "matrix-as-${name}";
         PrivateTmp = true;
         WorkingDirectory = dataDir;
         StateDirectory = "${baseNameOf dataDir}";
@@ -139,9 +139,17 @@ in
       })
       cfg.services;
 
-    users.users.matrix-appservice = { };
+    users.users = mapAttrs' (n: v: nameValuePair "matrix-as-${n}" {
+      group = "matrix-as-${n}";
+      isSystemUser = true;
+    }) cfg.services;
+    users.groups = mapAttrs' (n: v: nameValuePair "matrix-as-${n}" { }) cfg.services;
 
-    systemd.services = mapAttrs' (n: v: nameValuePair "matrix-as-${n}" (mkService n v)) cfg.services;
+    # Create a service for each appservice
+    systemd.services = (mapAttrs' (n: v: nameValuePair "matrix-as-${n}" (mkService n v)) cfg.services) // {
+      # Add the matrix service to the groups of all appservices to give access to the registration file
+      matrix-synapse.serviceConfig.SupplementaryGroups = mapAttrsToList (n: v: "matrix-as-${n}") cfg.services;
+    };
 
     services = mkIf cfg.addRegistrationFiles {
       matrix-synapse.app_service_config_files = mkIf (cfg.homeserver == "matrix-synapse")
