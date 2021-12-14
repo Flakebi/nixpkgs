@@ -1943,6 +1943,22 @@ let
           maintainers = [ ];
         };
       };
+      gregoire.dance = buildVscodeMarketplaceExtension {
+        meta = with lib; {
+          description = "Kakoune-inspired key bindings, modes, menus and scripting for Visual Studio Code";
+          downloadPage = "https://marketplace.visualstudio.com/items?itemName=gregoire.dance";
+          homepage = "https://github.com/71/dance";
+          license = licenses.isc;
+          maintainers = with maintainers; [ Flakebi ];
+        };
+        mktplcRef = {
+          name = "dance";
+          publisher = "gregoire";
+          version = "0.5.8";
+          sha256 = "qhiRbkDKUSJ3zWblsyS5veKlJlgIe2ElD35CxygmvaA=";
+        };
+      };
+
 
       genieai.chatgpt-vscode = buildVscodeMarketplaceExtension {
         meta = {
