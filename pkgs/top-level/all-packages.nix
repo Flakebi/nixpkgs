@@ -12925,6 +12925,8 @@ with pkgs;
 
   boost-sml = callPackage ../development/libraries/boost-ext/boost-sml { };
 
+  smtp-cli = callPackage ../development/tools/smtp-cli { };
+
   smu = callPackage ../tools/text/smu { };
 
   smug = callPackage ../tools/misc/smug { };
