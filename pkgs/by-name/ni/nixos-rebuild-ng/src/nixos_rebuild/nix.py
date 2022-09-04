@@ -57,7 +57,7 @@ def build(
     Returns the built attribute as path.
     """
     run_args = [
-        "nix-build",
+        "nom-build",
         build_attr.path,
         "--attr",
         build_attr.to_attr(attr),
@@ -77,7 +77,7 @@ def build_flake(
     Returns the built attribute as path.
     """
     run_args = [
-        "nix",
+        "nom",
         *FLAKE_FLAGS,
         "build",
         "--print-out-paths",
