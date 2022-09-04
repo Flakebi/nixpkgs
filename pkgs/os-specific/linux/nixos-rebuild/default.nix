@@ -9,6 +9,7 @@
   util-linux,
   nix,
   lib,
+  nix-output-monitor,
   nixosTests,
   installShellFiles,
   binlore,
@@ -47,6 +48,7 @@ substitute {
       gnugrep
       jq
       util-linux
+      nix-output-monitor
     ])
   ];
 
