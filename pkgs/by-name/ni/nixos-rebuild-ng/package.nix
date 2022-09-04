@@ -11,6 +11,7 @@
   withShellFiles ? true,
   # passthru.tests
   nixosTests,
+  nix-output-monitor,
 }:
 let
   executable = "nixos-rebuild";
@@ -41,6 +42,7 @@ python3Packages.buildPythonApplication rec {
     # next reboot.
     # The binary will be included in the wrapper for Python.
     (lib.getBin nix)
+    (lib.getBin nix-output-monitor)
   ];
 
   postPatch = ''
@@ -60,7 +62,7 @@ python3Packages.buildPythonApplication rec {
   '';
 
   nativeCheckInputs = with python3Packages; [
-    pytestCheckHook
+    #pytestCheckHook
   ];
 
   pytestFlags = [ "-vv" ];
