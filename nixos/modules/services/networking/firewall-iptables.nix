@@ -359,7 +359,7 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = "@${startScript} firewall-start";
-        ExecReload = "@${reloadScript} firewall-reload";
+        ExecReload = [ "@${reloadScript} firewall-reload" ];
         ExecStop = "@${stopScript} firewall-stop";
       };
     };
