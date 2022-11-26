@@ -426,6 +426,13 @@ in
       dbfile = lib.mkDefault "/var/lib/fail2ban/fail2ban.sqlite3";
     };
 
+    # Restart after firewall rules are cleared.
+    # Start in parallel to avoid the circular dependency because fail2ban waits on the firewall.
+    systemd.services.firewall.serviceConfig.ExecReload = lib.optional config.networking.firewall.enable
+      "-/bin/sh -c '/run/current-system/systemd/bin/systemctl try-restart fail2ban.service &'";
+    systemd.services.nftables.serviceConfig.ExecReload = lib.optional config.networking.nftables.enable
+      "-/bin/sh -c '/run/current-system/systemd/bin/systemctl try-restart fail2ban.service &'";
+
     # Add some reasonable default jails.  The special "DEFAULT" jail
     # sets default values for all other jails.
     services.fail2ban.jails = lib.mkMerge [
