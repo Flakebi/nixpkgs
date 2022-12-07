@@ -30,6 +30,8 @@ rustPlatform.buildRustPackage rec {
     lockFile = ./Cargo.lock;
   };
 
+  patches = [ ./colors.patch ];
+
   # skip flaky tests
   checkFlags = [
     "--skip=options::tests::test_detect_display_width"
