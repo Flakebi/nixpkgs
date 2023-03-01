@@ -25470,6 +25470,8 @@ with pkgs;
     stdenv = if stdenv.cc.isGNU && stdenv.isi686 then gcc11Stdenv else stdenv;
   };
 
+  directx-shader-compiler-proprietary = callPackage ../tools/graphics/directx-shader-compiler/proprietary.nix {};
+
   dkimproxy = callPackage ../servers/mail/dkimproxy { };
 
   dmarc-metrics-exporter = callPackage ../servers/monitoring/prometheus/dmarc-metrics-exporter { };
