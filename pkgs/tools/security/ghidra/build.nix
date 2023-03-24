@@ -3,6 +3,7 @@
 , lib
 , callPackage
 , gradle_7
+, llvmPackages_latest
 , perl
 , makeBinaryWrapper
 , openjdk17
@@ -13,6 +14,7 @@
 , icoutils
 , xcbuild
 , protobuf
+, swig4
 , ghidra-extensions
 }:
 
@@ -135,6 +137,10 @@ HERE
     outputHash = "sha256-nKfJiGoZlDEpbCmYVKNZXz2PYIosCd4nPFdy3MfprHc=";
   };
 
+  lldb = llvmPackages_latest.lldb;
+  # Extract llvm source
+  llvm-src = llvmPackages_latest.llvm.monorepoSrc;
+
 in stdenv.mkDerivation (finalAttrs: {
   inherit pname version src patches postPatch;
 
@@ -151,6 +157,7 @@ in stdenv.mkDerivation (finalAttrs: {
   ];
 
   nativeBuildInputs = [
+    swig4
     gradle
     unzip
     makeBinaryWrapper
@@ -165,6 +172,10 @@ in stdenv.mkDerivation (finalAttrs: {
 
   __darwinAllowLocalNetworking = true;
 
+  # Ghidra/Debug/Debugger-swig-lldb/src/main/cpp/LLDBWrapJava.cpp:14950
+  # error: format not a string literal and no format arguments [-Werror=format-security]
+  env.NIX_CFLAGS_COMPILE = "-Wno-format-security";
+
   buildPhase = ''
     runHook preBuild
     export HOME="$NIX_BUILD_TOP/home"
@@ -177,6 +188,17 @@ in stdenv.mkDerivation (finalAttrs: {
 
     gradle --offline --no-daemon --info -Dorg.gradle.java.home=${openjdk17} buildGhidra
     runHook postBuild
+
+    # Build lldb support according to
+    # https://github.com/NationalSecurityAgency/ghidra/blob/master/Ghidra/Debug/Debugger-swig-lldb/InstructionsForBuildingLLDBInterface.txt
+    export LLVM_HOME="${llvm-src}"
+    export LLVM_BUILD="${lldb.lib}"
+    pushd Ghidra/Debug/Debugger-swig-lldb
+    gradle --offline --no-daemon --info -Dorg.gradle.java.home=${openjdk17} generateSwig
+    cp -a build/generated/src/main src
+    rm -rf build/generated/src/main
+    gradle --offline --no-daemon --info -Dorg.gradle.java.home=${openjdk17} buildNatives
+    popd
   '';
 
   installPhase = ''
@@ -191,9 +213,12 @@ in stdenv.mkDerivation (finalAttrs: {
     mv "${pkg_path}"/*/* "${pkg_path}"
     rmdir "''${f[@]}"
 
+    cp -a Ghidra/Debug/Debugger-swig-lldb/build/os/*/* $out/lib/
+
     for f in Ghidra/Framework/Gui/src/main/resources/images/GhidraIcon*.png; do
       res=$(basename "$f" ".png" | cut -d"_" -f3 | cut -c11-)
       install -Dm444 "$f" "$out/share/icons/hicolor/''${res}x''${res}/apps/ghidra.png"
+
     done;
     # improved macOS icon support
     install -Dm444 Ghidra/Framework/Gui/src/main/resources/images/GhidraIcon64.png $out/share/icons/hicolor/32x32@2/apps/ghidra.png
@@ -206,7 +231,9 @@ in stdenv.mkDerivation (finalAttrs: {
     ln -s "${pkg_path}/ghidraRun" "$out/bin/ghidra"
     wrapProgram "${pkg_path}/support/launch.sh" \
       --set-default NIX_GHIDRAHOME "${pkg_path}/Ghidra" \
-      --prefix PATH : ${lib.makeBinPath [ openjdk17 ]}
+      --prefix PATH : ${lib.makeBinPath [ openjdk17 ]} \
+      --prefix LD_LIBRARY_PATH : $out/lib:${lib.makeLibraryPath [ lldb.lib ]} \
+      --set LLDB_DEBUGSERVER_PATH ${lldb}/bin/lldb-server
   '';
 
   passthru = {
