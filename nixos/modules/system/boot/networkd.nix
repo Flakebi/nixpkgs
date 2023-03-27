@@ -908,6 +908,8 @@ let
         (assertOnlyFields [
           "UseAddress"
           "UseDNS"
+          "UseHostname"
+          "UseDomains"
           "UseNTP"
           "UseHostname"
           "UseDomains"
@@ -915,6 +917,7 @@ let
           "RapidCommit"
           "MUDURL"
           "RequestOptions"
+          "SendRelease"
           "SendVendorOption"
           "PrefixDelegationHint"
           "WithoutRA"
@@ -929,11 +932,14 @@ let
         ])
         (assertValueOneOf "UseAddress" boolValues)
         (assertValueOneOf "UseDNS" boolValues)
+        (assertValueOneOf "UseHostname" boolValues)
+        (assertValueOneOf "UseDomains" (boolValues ++ ["route"]))
         (assertValueOneOf "UseNTP" boolValues)
         (assertValueOneOf "UseHostname" boolValues)
         (assertValueOneOf "UseDomains" (boolValues ++ ["route"]))
         (assertInt "RouteMetric")
         (assertValueOneOf "RapidCommit" boolValues)
+        (assertValueOneOf "SendRelease" boolValues)
         (assertValueOneOf "WithoutRA" ["no" "solicit" "information-request"])
         (assertRange "SendOption" 1 65536)
         (assertInt "IAID")
