@@ -37,14 +37,6 @@ in
         '';
       };
 
-      logPath = mkOption {
-        type = types.path;
-        default = "/var/log/teamspeak3-server/";
-        description = ''
-          Directory to store log files in.
-        '';
-      };
-
       voiceIP = mkOption {
         type = types.nullOr types.str;
         default = null;
@@ -143,10 +135,6 @@ in
       gid = config.ids.gids.teamspeak;
     };
 
-    systemd.tmpfiles.rules = [
-      "d '${cfg.logPath}' - ${user} ${group} - -"
-    ];
-
     networking.firewall = mkIf cfg.openFirewall {
       allowedTCPPorts = [
         cfg.fileTransferPort
@@ -174,7 +162,7 @@ in
         ExecStart = ''
           ${ts3}/bin/ts3server \
             dbsqlpath=${ts3}/lib/teamspeak/sql/ \
-            logpath=${cfg.logPath} \
+            logpath=/var/log/teamspeak3-server/ \
             license_accepted=1 \
             default_voice_port=${toString cfg.defaultVoicePort} \
             filetransfer_port=${toString cfg.fileTransferPort} \
@@ -188,6 +176,7 @@ in
             ${optionalString (cfg.queryIP != null) "query_http_ip=${cfg.queryIP}"} \
         '';
         WorkingDirectory = cfg.dataDir;
+        LogsDirectory = "teamspeak3-server";
         User = user;
         Group = group;
         Restart = "on-failure";
