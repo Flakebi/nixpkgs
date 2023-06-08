@@ -1,11 +1,12 @@
 { lib
 , stdenv
-, symlinkJoin
 , makeWrapper
+, runCommandLocal
 , wrapQtAppsHook
 , addOpenGLRunpath
 
 , prismlauncher-unwrapped
+, bubblewrap
 
 , qtbase  # needed for wrapQtAppsHook
 , qtsvg
@@ -27,8 +28,9 @@
 , vulkan-loader
 , libusb1
 
+, enableBubblewrap ? lib.meta.availableOn stdenv.hostPlatform bubblewrap
 , msaClientID ? null
-, gamemodeSupport ? stdenv.isLinux
+, gamemodeSupport ? false
 , textToSpeechSupport ? stdenv.isLinux
 , controllerSupport ? stdenv.isLinux
 
@@ -47,20 +49,21 @@
 }:
 
 assert lib.assertMsg (withWaylandGLFW -> stdenv.isLinux) "withWaylandGLFW is only available on Linux";
+# `gamemodeSupport` requires session D-Bus access, which is blocked by the sandbox.
+assert enableBubblewrap -> !gamemodeSupport;
 
 let
   prismlauncher' = prismlauncher-unwrapped.override {
     inherit msaClientID gamemodeSupport;
   };
+
 in
-
-symlinkJoin {
-  name = "prismlauncher-${prismlauncher'.version}";
-
-  paths = [ prismlauncher' ];
-
+runCommandLocal "prismlauncher-${prismlauncher'.version}" {
   nativeBuildInputs = [
     wrapQtAppsHook
+
+    # Force to use the shell wrapper instead of the binary wrapper. We have scripts.
+    makeWrapper
   ]
   # purposefully using a shell wrapper here for variable expansion
   # see https://github.com/NixOS/nixpkgs/issues/172583
@@ -78,6 +81,21 @@ symlinkJoin {
     fi
   '';
 
+  # Passthrough
+  # Ref: https://github.com/NixOS/nixpkgs/blob/5e871d8aa6f57cc8e0dc087d1c5013f6e212b4ce/pkgs/build-support/build-fhsenv-bubblewrap/default.nix#L170
+  wrapperPreExec = lib.optionalString enableBubblewrap ''
+    args=()
+    if [[ "$DISPLAY" == :* ]]; then
+        local_socket="/tmp/.X11-unix/X''${DISPLAY#?}"
+        args+=(--ro-bind-try "$local_socket" "$local_socket")
+    fi
+    if [[ "$WAYLAND_DISPLAY" = /* ]]; then
+        args+=(--ro-bind-try "$WAYLAND_DISPLAY" "$WAYLAND_DISPLAY")
+    elif [[ -n "$WAYLAND_DISPLAY" ]]; then
+        args+=(--ro-bind-try "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" "/tmp/$WAYLAND_DISPLAY")
+    fi
+  '';
+
   postBuild = ''
     ${lib.optionalString withWaylandGLFW ''
       qtWrapperArgs+=(--run "$waylandPreExec")
@@ -85,6 +103,51 @@ symlinkJoin {
 
     wrapQtAppsHook
   '';
+
+  bwrapArgs = lib.optionals enableBubblewrap [
+    "--unshare-user"
+    "--unshare-ipc"
+    "--unshare-pid"
+    "--unshare-uts"
+    "--unshare-cgroup"
+    "--die-with-parent"
+
+    "--dev /dev"
+    "--proc /proc"
+    "--ro-bind /nix /nix"
+    "--ro-bind /etc /etc"
+    "--tmpfs /tmp"
+
+    # Network is required.
+    "--share-net"
+    "--ro-bind /run/systemd/resolve /run/systemd/resolve"
+
+    # Mesa & OpenGL.
+    "--ro-bind /run/opengl-driver /run/opengl-driver"
+    "--dev-bind-try /dev/dri /dev/dri"
+    "--ro-bind-try /sys/class /sys/class"
+    "--ro-bind-try /sys/dev/char /sys/dev/char"
+    "--ro-bind-try /sys/devices/pci0000:00 /sys/devices/pci0000:00"
+    "--ro-bind-try /sys/devices/system/cpu /sys/devices/system/cpu"
+
+    # Audio.
+    "--setenv XDG_RUNTIME_DIR /tmp"
+    ''--ro-bind-try "$XDG_RUNTIME_DIR/pulse" /tmp/pulse''
+    ''--ro-bind-try "$XDG_RUNTIME_DIR/pipewire-0" /tmp/pipewire-0''
+
+    # Runtime args from `wrapperPreExec`.
+    ''"''${args[@]}"''
+
+    # Data storage.
+    ''--bind "''${XDG_DATA_HOME:+$HOME/.local/share}/PrismLauncher" $HOME/.local/share/PrismLauncher''
+    "--unsetenv XDG_DATA_HOME"
+
+    # Block dangerous D-Bus.
+    "--unsetenv DBUS_SESSION_BUS_ADDRESS"
+
+    "--"
+    "${prismlauncherFinal}/bin/prismlauncher"
+  ];
 
   qtWrapperArgs =
     let
@@ -127,4 +190,12 @@ symlinkJoin {
     ];
 
   inherit (prismlauncher') meta;
-}
+} ''
+  ${if enableBubblewrap then ''
+    qtWrapperArgs+=(--run "$wrapperPreExec" --add-flags "$bwrapArgs")
+    makeQtWrapper ${bubblewrap}/bin/bwrap $out/bin/prismlauncher
+  '' else ''
+    makeQtWrapper ${prismlauncherFinal}/bin/prismlauncher $out/bin/prismlauncher
+  ''}
+  ln -s ${prismlauncherFinal}/share $out/share
+''
