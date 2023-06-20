@@ -138,14 +138,20 @@ runCommandLocal "prismlauncher-${prismlauncher'.version}" {
     # Runtime args from `wrapperPreExec`.
     ''"''${args[@]}"''
 
+    ''--ro-bind-try "$HOME/.config" $HOME/.config''
+    ''--ro-bind-try "/run/current-system" /run/current-system''
     # Data storage.
-    ''--bind "''${XDG_DATA_HOME:+$HOME/.local/share}/PrismLauncher" $HOME/.local/share/PrismLauncher''
+    ''--bind "''${XDG_DATA_HOME:-$HOME/.local/share}/PrismLauncher" $HOME/.local/share/PrismLauncher''
     "--unsetenv XDG_DATA_HOME"
+
+    # ''--ro-bind-try "''${XDG_CONFIG_DIR:-$HOME/.config}/Kvantum" $HOME/.config/Kvantum''
+    # ''--ro-bind-try "''${XDG_CONFIG_DIR:-$HOME/.config}/qt5ct" $HOME/.config/qt5ct''
 
     # Block dangerous D-Bus.
     "--unsetenv DBUS_SESSION_BUS_ADDRESS"
 
     "--"
+    # "/nix/store/nwi8rkfs9kigz3nd42fklhjmpb0skg69-coreutils-full-9.1/bin/env"
     "${prismlauncherFinal}/bin/prismlauncher"
   ];
 
