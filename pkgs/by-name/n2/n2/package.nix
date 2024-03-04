@@ -5,16 +5,16 @@
 
 rustPlatform.buildRustPackage {
   pname = "n2";
-  version = "unstable-2023-10-10";
+  version = "unstable-2024-01-25";
 
   src = fetchFromGitHub {
     owner = "evmar";
     repo = "n2";
-    rev = "90041c1f010d27464e3b18e38440ed9855ea62ef";
-    hash = "sha256-svJPcriSrqloJlr7pIp/k84O712l4ZEPlSr58GPANXY=";
+    rev = "668d9ab5cdbd493a8af356078066423487ac81e2";
+    hash = "sha256-3tEYjW54skoZ2JV21gvKWHF5yaQ6e2tc+8RuFoWvDa4=";
   };
 
-  cargoHash = "sha256-jrIo0N3o2fYe3NgNG33shkMd0rJxi5evtidCL9BcfVc=";
+  cargoHash = "sha256-2uCUgm8/3yiPNqiYfiYsTjPO4dZ9DHmN90fhNwPhdt4=";
 
   meta = with lib; {
     homepage = "https://github.com/evmar/n2";
