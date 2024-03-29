@@ -8,6 +8,7 @@
   wrapQtAppsHook,
   nix-update-script,
   hyprland,
+  grim,
   hyprland-protocols,
   hyprlang,
   hyprutils,
@@ -77,6 +78,7 @@ stdenv.mkDerivation (finalAttrs: {
       "''${qtWrapperArgs[@]}" \
       --prefix PATH ":" ${
         lib.makeBinPath [
+          grim
           slurp
           hyprland
         ]
