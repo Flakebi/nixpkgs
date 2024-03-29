@@ -6,6 +6,7 @@
 , wayland-scanner
 , makeWrapper
 , wrapQtAppsHook
+, grim
 , hyprland-protocols
 , hyprlang
 , libdrm
@@ -64,7 +65,7 @@ stdenv.mkDerivation (self: {
       --prefix PATH ":" ${lib.makeBinPath [slurp hyprland]}
 
     wrapProgramShell $out/libexec/xdg-desktop-portal-hyprland \
-      --prefix PATH ":" ${lib.makeBinPath [(placeholder "out") hyprpicker]}
+      --prefix PATH ":" ${lib.makeBinPath [(placeholder "out") grim hyprpicker slurp]}
   '';
 
   meta = with lib; {
