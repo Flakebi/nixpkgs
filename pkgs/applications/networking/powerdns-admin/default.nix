@@ -95,6 +95,10 @@ in stdenv.mkDerivation {
 
   postPatch = ''
     rm -r powerdnsadmin/static powerdnsadmin/assets.py
+    substituteInPlace powerdnsadmin/__init__.py \
+      --replace-fail 'models.init_app(app)' ""
+    substituteInPlace powerdnsadmin/__init__.py \
+      --replace-fail 'models.base.db' 'models.base.db; models.init_app(app)'
   '';
 
   installPhase = ''
