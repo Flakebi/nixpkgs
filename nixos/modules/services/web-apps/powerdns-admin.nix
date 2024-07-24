@@ -91,11 +91,13 @@ in
       serviceConfig = {
         ExecStart = "${pkgs.powerdns-admin}/bin/powerdns-admin --pid /run/powerdns-admin/pid ${escapeShellArgs cfg.extraArgs}";
         # Set environment variables only for starting flask database upgrade
-        ExecStartPre = "${pkgs.coreutils}/bin/env FLASK_APP=${pkgs.powerdns-admin}/share/powerdnsadmin/__init__.py ${pkgs.python3Packages.flask}/bin/flask db upgrade -d ${pkgs.powerdns-admin}/share/migrations";
+        # TODO Fix properly
+        #ExecStartPre = "${pkgs.coreutils}/bin/env FLASK_APP=${pkgs.powerdns-admin}/share/powerdnsadmin/__init__.py SESSION_TYPE=filesystem ${pkgs.python3Packages.flask}/bin/flask db upgrade -d ${pkgs.powerdns-admin}/share/migrations";
         ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
         ExecStop = "${pkgs.coreutils}/bin/kill -TERM $MAINPID";
         PIDFile = "/run/powerdns-admin/pid";
         RuntimeDirectory = "powerdns-admin";
+        WorkingDirectory = "/tmp"; # For the ExecStartPre
         User = "powerdnsadmin";
         Group = "powerdnsadmin";
 
