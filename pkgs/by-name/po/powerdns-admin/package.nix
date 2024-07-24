@@ -7,6 +7,7 @@
   nixosTests,
   writeText,
   python3,
+  powerdns-admin,
 }:
 
 let
@@ -91,6 +92,15 @@ let
       ./0002-Remove-cssrewrite-filter.patch
     ];
     buildPhase = ''
+      # Fix so distutils is available in build prosess.
+      # Function setuptools/_distutils/util.py:byte_compile is used in build prosess
+      # but setuptools distutils import trick/hack is not working in build prosses
+      # and we get ModuleNotfoundError 'No module named 'distutils'
+      # For more explanation see first attempt:
+      # https://github.com/NixOS/nixpkgs/pull/328182
+      DISTUTILS=$(mktemp -d)
+      ln -s ${python.pkgs.setuptools}/${python.sitePackages}/setuptools/_distutils "$DISTUTILS/distutils"
+      PYTHONPATH="$PYTHONPATH:$DISTUTILS"
       SESSION_TYPE=filesystem FLASK_APP=./powerdnsadmin/__init__.py flask assets build
     '';
     installPhase = ''
@@ -138,6 +148,10 @@ stdenv.mkDerivation {
 
   postPatch = ''
     rm -r powerdnsadmin/static powerdnsadmin/assets.py
+    substituteInPlace powerdnsadmin/__init__.py \
+      --replace-fail 'models.init_app(app)' ""
+    substituteInPlace powerdnsadmin/__init__.py \
+      --replace-fail 'models.base.db' 'models.base.db; models.init_app(app)'
   '';
 
   installPhase = ''
@@ -154,16 +168,24 @@ stdenv.mkDerivation {
 
     echo "$gunicornScript" > $out/bin/powerdns-admin
     chmod +x $out/bin/powerdns-admin
+    # Fix so distutils is available in build prosess.
+    # Function setuptools/_distutils/util.py:byte_compile is used in build prosess
+    # but setuptools distutils import trick/hack is not working in build prosses
+    # and we get ModuleNotfoundError 'No module named 'distutils'
+    # For more explanation see first attempt:
+    # https://github.com/NixOS/nixpkgs/pull/328182
+    mkdir -p $out/distutils
+    ln -s ${python.pkgs.setuptools}/${python.sitePackages}/setuptools/_distutils "$out/distutils/distutils"
     wrapProgram $out/bin/powerdns-admin \
       --set PATH ${python.pkgs.python}/bin \
-      --set PYTHONPATH $out/share:$program_PYTHONPATH
+      --set PYTHONPATH $out/share:$program_PYTHONPATH:$out/distutils
 
     runHook postInstall
   '';
 
   passthru = {
     # PYTHONPATH of all dependencies used by the package
-    pythonPath = python3.pkgs.makePythonPath pythonDeps;
+    pythonPath = (python3.pkgs.makePythonPath pythonDeps) + ":${powerdns-admin}/distutils";
     tests = nixosTests.powerdns-admin;
   };
 
