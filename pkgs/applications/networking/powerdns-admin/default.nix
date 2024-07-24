@@ -40,6 +40,15 @@ let
       ./0002-Remove-cssrewrite-filter.patch
     ];
     buildPhase = ''
+      # Fix so distutils is available in build prosess.
+      # Function setuptools/_distutils/util.py:byte_compile is used in build prosess
+      # but setuptools distutils import trick/hack is not working in build prosses
+      # and we get ModuleNotfoundError 'No module named 'distutils'
+      # For more explanation see first attempt:
+      # https://github.com/NixOS/nixpkgs/pull/328182
+      DISTUTILS=$(mktemp -d)
+      ln -s ${python.pkgs.setuptools}/${python.sitePackages}/setuptools/_distutils "$DISTUTILS/distutils"
+      PYTHONPATH="$PYTHONPATH:$DISTUTILS"
       SESSION_TYPE=filesystem FLASK_APP=./powerdnsadmin/__init__.py flask assets build
     '';
     installPhase = ''
