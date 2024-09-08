@@ -144,6 +144,27 @@ in
     '';
   };
 
+  mautrix-go2 = {
+    inherit (mautrix) startupScript;
+
+    settings = recursiveUpdate mautrix.settings {
+      bridge.username_template = null;
+      appservice.username_template = "${name}_{{.}}";
+      database = {
+        type = "sqlite3";
+        uri = "$DIR/database.db";
+      };
+
+      double_puppet.secrets.${homeserverDomain} = "as_token:$DOUBLEPUPPET_AS_TOKEN";
+    };
+
+    description = ''
+      The settings are configured to use a sqlite database. The startupScript will
+      create a new config file on every run to set the tokens, because mautrix
+      requires them to be in the config file.
+    '';
+  };
+
   mautrix-python = {
     settings = recursiveUpdate mautrix.settings {
       appservice.database = "sqlite:///$DIR/database.db";
