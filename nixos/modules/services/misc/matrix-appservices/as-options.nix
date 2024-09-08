@@ -59,6 +59,8 @@ types.submodule ({ config, name, ... }:
             - $DIR which refers to the appservice's data directory.
             - $AS_TOKEN, $HS_TOKEN which refers to the Appservice and
                 Homeserver registration tokens.
+            - $DOUBLEPUPPET_AS_TOKEN refers to the Appservice registration
+                token for doublepuppeting.
 
           Secret tokens, should be specified in serviceConfig.EnvironmentFile
           instead of this world-readable attribute set.
@@ -75,11 +77,11 @@ types.submodule ({ config, name, ... }:
           namespaces = {
             users = [
               {
-                regex = "@${name}_.*:${homeserverDomain}";
+                regex = "^@${name}_.*:${homeserverDomain}$";
                 exclusive = true;
               }
               {
-                regex = "@${name}bot:${homeserverDomain}";
+                regex = "^@${name}bot:${homeserverDomain}$";
                 exclusive = true;
               }
             ];
@@ -140,5 +142,7 @@ types.submodule ({ config, name, ... }:
           Services started before this appservice
         '';
       };
+
+      doublepuppetAs = mkEnableOption "Use extra (global) doublepuppet appservice for this appservice";
     };
   })
