@@ -26,6 +26,17 @@ let
         sender_localpart = "$SENDER_LOCALPART";
         rate_limited = false;
       } // registrationData;
+
+      doublepuppetRegistrationFile = "${dataDir}/doublepuppet-registration.yaml";
+      doublepuppetRegistrationContent = {
+        id = "doublepuppet";
+        url =  "";
+        as_token = "$AS_TOKEN";
+        hs_token = "$HS_TOKEN";
+        sender_localpart = "$SENDER_LOCALPART";
+        rate_limited = false;
+        namespaces.users = [{regex = "^@.*:${builtins.replaceStrings ["."] ["\\."] cfg.homeserverDomain}$"; exclusive = false;}];
+      };
     in
     {
       description = "A matrix appservice for ${name}.";
@@ -55,6 +66,20 @@ let
           chmod 640 ${registrationFile}
         fi
 
+      '' + (lib.optionalString doublepuppetAs ''
+        if [ ! -f ${doublepuppetRegistrationFile} ]; then
+          AS_TOKEN=$(cat /proc/sys/kernel/random/uuid) \
+          HS_TOKEN=$(cat /proc/sys/kernel/random/uuid) \
+          SENDER_LOCALPART=$(cat /proc/sys/kernel/random/uuid) \
+          ${pkgs.envsubst}/bin/envsubst \
+            -i ${settingsFormat.generate "config.json" doublepuppetRegistrationContent} \
+            -o ${doublepuppetRegistrationFile}
+
+          chmod 640 ${doublepuppetRegistrationFile}
+        fi
+
+        DOUBLEPUPPET_AS_TOKEN=$(cat ${doublepuppetRegistrationFile} | yq .as_token | tr -d '"') \
+      '') + ''
         AS_TOKEN=$(cat ${registrationFile} | yq .as_token | tr -d '"') \
         HS_TOKEN=$(cat ${registrationFile} | yq .hs_token | tr -d '"') \
         ${pkgs.envsubst}/bin/envsubst -i ${settingsData} -o ${settingsFile}
@@ -166,8 +191,10 @@ in
 
     services =
       let
-        registrationFiles = mapAttrsToList (n: _: "/var/lib/matrix-as-${n}/${n}-registration.yaml")
-            (filterAttrs (_: v: v.registrationData != { }) cfg.services);
+        serviceRegistrationFiles = n: v: ["/var/lib/matrix-as-${n}/${n}-registration.yaml"] ++
+          (lib.optional v.doublepuppetAs "/var/lib/matrix-as-${n}/doublepuppet-registration.yaml");
+        registrationFiles = (lib.flatten (mapAttrsToList serviceRegistrationFiles
+            (filterAttrs (_: v: v.registrationData != { }) cfg.services)));
       in
       mkIf cfg.addRegistrationFiles {
         matrix-synapse.settings.app_service_config_files = mkIf (cfg.homeserver == "matrix-synapse") registrationFiles;
