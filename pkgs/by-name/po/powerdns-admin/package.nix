@@ -63,6 +63,7 @@ let
     pyyaml
     jinja2
     itsdangerous
+    standard-imghdr
     webcolors
     werkzeug
     zipp
