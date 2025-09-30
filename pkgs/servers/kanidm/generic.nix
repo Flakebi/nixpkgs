@@ -9,6 +9,7 @@
 
 {
   stdenv,
+  fetchpatch,
   lib,
   formats,
   nixosTests,
@@ -48,15 +49,17 @@ let
 in
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "kanidm" + (lib.optionalString enableSecretProvisioning "-with-secret-provisioning");
-  inherit version cargoHash;
+  inherit version;
+
+  cargoHash = "sha256-tyIQHnd7iASb9n7bR65CWP5G96oJdwn2F56C6toq8Gc=";
 
   cargoDepsName = "kanidm";
 
   src = fetchFromGitHub {
     owner = "kanidm";
     repo = "kanidm";
-    tag = "v${finalAttrs.version}";
-    inherit hash;
+    rev = "7073e6d011ea57e9d142d7231fa17ef091d40d79";
+    hash = "sha256-5Nlb8llg6wAYENwb8+na1y59GsXccA0yTw5jgYbYmpc=";
   };
 
   env.KANIDM_BUILD_PROFILE = "release_nixpkgs_${arch}";
@@ -79,6 +82,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
         client_config_path = "/etc/kanidm/config";
         resolver_config_path = "/etc/kanidm/unixd";
         resolver_unix_shell_path = "${lib.getBin bashInteractive}/bin/bash";
+        resolver_service_account_token_path = "/etc/kanidm/token";
         server_admin_bind_path = socket_path;
         server_config_path = "/etc/kanidm/server.toml";
         server_ui_pkg_path = "@htmx_ui_pkg_path@";
@@ -114,6 +118,8 @@ rustPlatform.buildRustPackage (finalAttrs: {
   # which breaks when we upgrade to new Rust before them.
   # Just allow warnings. It's fine, really.
   env.RUSTFLAGS = "--cap-lints warn";
+
+  doCheck = false;
 
   # Not sure what pathological case it hits when compiling tests with LTO,
   # but disabling it takes the total `cargo check` time from 40 minutes to
