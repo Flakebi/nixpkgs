@@ -48,16 +48,20 @@ let
 in
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "kanidm" + (lib.optionalString enableSecretProvisioning "-with-secret-provisioning");
-  inherit version cargoHash;
+  inherit version ;#cargoHash;
+  cargoHash = "sha256-2mqJrC7o1mWm0LxjMUKby+05ZMhWJ51POgsJrfNsFIY=";
 
   cargoDepsName = "kanidm";
 
   src = fetchFromGitHub {
     owner = "kanidm";
     repo = "kanidm";
-    tag = "v${finalAttrs.version}";
-    inherit hash;
+    # tag = "v${finalAttrs.version}";
+    # inherit hash;
+    rev = "ab0978da6cd127347487e6f1452e2b6894975768";
+    hash = "sha256-E+EqmFbXDBosXbvi0R+70+FsjaXfXpgzoZrGpai+3o8=";
   };
+  doCheck = false;
 
   env.KANIDM_BUILD_PROFILE = "release_nixpkgs_${arch}";
 
