@@ -54,12 +54,12 @@ rustPlatform.buildRustPackage (finalAttrs: {
   cargoDepsName = "kanidm";
 
   src = fetchFromGitHub {
-    owner = "kanidm";
+    owner = "Firstyear";
     repo = "kanidm";
     # tag = "v${finalAttrs.version}";
     # inherit hash;
-    rev = "ab0978da6cd127347487e6f1452e2b6894975768";
-    hash = "sha256-E+EqmFbXDBosXbvi0R+70+FsjaXfXpgzoZrGpai+3o8=";
+    rev = "ba44bba2a138ae2e9c53361a37821e63feb09902";
+    hash = "sha256-zNGgZg5VMRhFXvL+j/saJsdSz4Bu3m+9yvIkCsFGFu0=";
   };
   doCheck = false;
 
