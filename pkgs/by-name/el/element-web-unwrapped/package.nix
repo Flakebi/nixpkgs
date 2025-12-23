@@ -14,6 +14,12 @@ let
   inherit (pinData.hashes) webSrcHash webYarnHash webSharedComponentsYarnHash;
   noPhoningHome = {
     disable_guests = true; # disable automatic guest account registration at matrix.org
+    # Enable element-call https://github.com/NixOS/nixpkgs/pull/357511
+    features = {
+      feature_video_rooms = true;
+      feature_group_calls = true;
+      feature_element_call_video_rooms = true;
+    };
   };
   # Do not inherit jitsi-meet's knownVulnerabilities (libolm).
   # https://github.com/NixOS/nixpkgs/pull/335753
