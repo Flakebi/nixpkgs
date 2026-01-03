@@ -71,6 +71,8 @@ rustPlatform.buildRustPackage (finalAttrs: {
       --replace-fail ./share/manifest.json "$out/share/$pname/assets/manifest.json"
     substituteInPlace crates/config/src/sections/policy.rs \
       --replace-fail ./share/policy.wasm "$out/share/$pname/policy.wasm"
+    substituteInPlace crates/storage-pg/migrations/20251127145951_user_registration_upstream_oauth_session_idx.sql \
+      --replace-fail 'CONCURRENTLY user_registrations_upstream_oauth_session_id_idx' 'CONCURRENTLY IF NOT EXISTS user_registrations_upstream_oauth_session_id_idx'
   '';
 
   preBuild = ''
